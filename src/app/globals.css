@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette (brief-specified) */
+  --color-primary: #0f172a; /* deep navy slate */
+  --color-primary-light: #1e293b;
+  --color-secondary: #2563eb; /* electric blue */
+  --color-success: #16a34a; /* gains */
+  --color-danger: #dc2626; /* losses */
+  --color-accent: #f59e0b; /* amber */
+  --color-bg: #ffffff;
+  --color-bg-muted: #f8fafc;
+  --color-slate: #64748b;
+
+  --background: var(--color-bg);
+  --foreground: var(--color-primary);
+
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+  --font-data: var(--font-jetbrains-mono);
+
+  --radius-card: 14px;
+}
+
+.dark {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --color-bg-muted: #111827;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-primary: var(--color-primary);
+  --color-brand-secondary: var(--color-secondary);
+  --color-brand-success: var(--color-success);
+  --color-brand-danger: var(--color-danger);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-muted: var(--color-bg-muted);
+  --color-brand-slate: var(--color-slate);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-data);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  animation: ticker-scroll 38s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.glass-panel {
+  background: color-mix(in srgb, var(--color-primary) 4%, white 96%);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 10%, white 90%);
+}
+
+.dark .glass-panel {
+  background: color-mix(in srgb, white 6%, var(--color-primary) 94%);
+  border: 1px solid color-mix(in srgb, white 12%, var(--color-primary) 88%);
+}
+
+.tabular {
+  font-family: var(--font-data);
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
