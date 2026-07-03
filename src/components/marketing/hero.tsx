@@ -100,10 +100,10 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.15 }}
           className="relative"
         >
-          <div className="glass-panel relative rounded-2xl p-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="glass-panel relative rounded-2xl p-5 shadow-2xl bg-gray-400">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 ">
               <div>
-                <p className="text-xs text-white/50">Portfolio value</p>
+                <p className="text-xs text-white/50 ">Portfolio value</p>
                 <p className="font-display tabular text-3xl font-bold text-white">
                   $128,940.55
                 </p>
@@ -128,7 +128,7 @@ export function Hero() {
                       <span
                         className={cn(
                           "h-1.5 w-1.5 rounded-full",
-                          isUp ? "bg-green-400" : "bg-red-400"
+                          isUp ? "bg-green-400" : "bg-red-400",
                         )}
                       />
                       <span className="text-sm font-medium text-white">
@@ -142,7 +142,7 @@ export function Hero() {
                       <p
                         className={cn(
                           "tabular text-xs",
-                          isUp ? "text-green-400" : "text-red-400"
+                          isUp ? "text-green-400" : "text-red-400",
                         )}
                       >
                         {formatPercent(asset.changePercent)}
