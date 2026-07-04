@@ -12,7 +12,7 @@ const buttonVariants = cva(
         success: "bg-brand-success text-white hover:bg-green-700",
         danger: "bg-brand-danger text-white hover:bg-red-700",
         outline:
-          "border border-slate-300 dark:border-slate-700 text-foreground dark:text-white cursor-pointer hover:bg-brand-muted hover:text-foreground",
+          "border border-slate-300 dark:border-slate-700 text-foreground dark:bg-slate-800 dark:text-white cursor-pointer hover:bg-brand-muted hover:text-foreground",
         ghost:
           "text-foreground dark:text-white cursor-pointer hover:bg-brand-muted hover:text-foreground",
         dark: "bg-brand-primary text-white hover:bg-slate-800",

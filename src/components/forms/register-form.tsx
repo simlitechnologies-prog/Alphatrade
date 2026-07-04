@@ -4,36 +4,45 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import Link from "next/link";
-import { UserPlus, Check, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Check, Eye, EyeOff, Shield } from "lucide-react";
+import { FaChrome } from "react-icons/fa";
 import { registerSchema, type RegisterFormValues } from "@/lib/schemas";
-import { signUp } from "@/services/auth.service";
+import { signUp, signInWithGoogle } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RHFInput, Spinner, Select } from "@/components/forms/inputs";
 import { COUNTRIES } from "@/constants";
 
 const perks = [
-  "Free account, no minimum deposit",
-  "180+ markets from day one",
-  "Demo account included",
+  { icon: "✨", text: "Free account, no minimum deposit" },
+  { icon: "📊", text: "180+ markets from day one" },
+  { icon: "🎯", text: "Demo account included" },
 ];
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const methods = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: "", lastName: "", email: "", password: "",
-      confirmPassword: "", phoneNumber: "", country: "",
-      agreedToTerms: false, agreedToRisk: false,
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phoneNumber: "",
+      country: "",
+      agreedToTerms: false,
+      agreedToRisk: false,
     },
   });
 
   const {
-    handleSubmit, register,
+    handleSubmit,
+    register,
     formState: { isSubmitting, errors },
   } = methods;
 
@@ -47,18 +56,40 @@ export function RegisterForm() {
     }
   }
 
+  async function handleGoogleSignUp() {
+    setIsGoogleLoading(true);
+    setServerError(null);
+    try {
+      await signInWithGoogle();
+      // The user will be redirected to Google's OAuth page
+      // Success will be handled on the callback page
+    } catch (error) {
+      setServerError("Google sign-up failed. Please try again.");
+      setIsGoogleLoading(false);
+    }
+  }
+
   if (success) {
     return (
-      <Card className="bg-white text-center py-8">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-50 text-brand-success">
-          <Check size={28} />
-        </span>
-        <h2 className="font-display mt-4 text-xl font-bold text-foreground">Account created!</h2>
-        <p className="mt-2 text-sm text-foreground/55">
-          Check your inbox for a verification email, then log in to start trading.
+      <Card className="bg-gradient-to-br from-white to-green-50/50 shadow-xl border-0 text-center py-12 px-8">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg shadow-green-200">
+          <Check size={36} className="text-white" strokeWidth={3} />
+        </div>
+        <h2 className="font-display mt-6 text-2xl font-bold text-gray-800">
+          Account Created! 🎉
+        </h2>
+        <p className="mt-3 text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
+          Check your inbox for a verification email, then log in to start
+          trading.
         </p>
         <Link href="/login">
-          <Button variant="primary" size="md" className="mt-6 w-full">Go to login</Button>
+          <Button
+            variant="primary"
+            size="lg"
+            className="mt-8 w-full max-w-xs mx-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-200 transition-all duration-300"
+          >
+            Go to login
+          </Button>
         </Link>
       </Card>
     );
@@ -66,42 +97,91 @@ export function RegisterForm() {
 
   return (
     <FormProvider {...methods}>
-      <Card className="bg-white">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-secondary/10 text-brand-secondary">
-            <UserPlus size={18} />
-          </span>
-          <div>
-            <h1 className="font-display text-xl font-bold text-foreground">Open free account</h1>
-            <p className="text-xs text-foreground/50">Takes less than 5 minutes</p>
+      <Card className="bg-white shadow-xl border-0 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm text-white shadow-lg">
+              <UserPlus size={20} strokeWidth={2.5} />
+            </span>
+            <div>
+              <h1 className="font-display text-xl font-bold text-white tracking-tight">
+                Open free account
+              </h1>
+              <p className="text-xs text-white/80">Takes less than 5 minutes</p>
+            </div>
           </div>
         </div>
 
-        <ul className="mb-5 space-y-1">
-          {perks.map((p) => (
-            <li key={p} className="flex items-center gap-2 text-xs text-foreground/60">
-              <Check size={12} className="shrink-0 text-brand-success" />
-              {p}
-            </li>
-          ))}
-        </ul>
+        {/* Perks */}
+        <div className="px-6 pt-5 pb-3 border-b border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {perks.map((p) => (
+              <div
+                key={p.text}
+                className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50/80 rounded-lg px-3 py-2 border border-gray-100"
+              >
+                <span className="text-base">{p.icon}</span>
+                <span>{p.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="p-6 space-y-5"
+          noValidate
+        >
+          {/* Google Sign-Up Button */}
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full gap-2.5 h-12 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 text-sm font-semibold"
+              onClick={handleGoogleSignUp}
+              disabled={isGoogleLoading || isSubmitting}
+            >
+              {isGoogleLoading ? (
+                <Spinner size={18} className="text-gray-600" />
+              ) : (
+                <FaChrome size={20} className="text-blue-600" />
+              )}
+              {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
+            </Button>
+          </div>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-4 text-gray-500">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
+          {/* Name Fields */}
           <div className="grid grid-cols-2 gap-3">
             <RHFInput<RegisterFormValues>
               name="firstName"
               label="First name"
-              placeholder="Kwame"
+              placeholder="Enter First Name"
               required
             />
             <RHFInput<RegisterFormValues>
               name="lastName"
               label="Last name"
-              placeholder="Mensah"
+              placeholder="Enter Last Name"
               required
             />
           </div>
 
+          {/* Email */}
           <RHFInput<RegisterFormValues>
             name="email"
             label="Email address"
@@ -110,28 +190,34 @@ export function RegisterForm() {
             required
           />
 
+          {/* Phone */}
           <RHFInput<RegisterFormValues>
             name="phoneNumber"
             label="Phone number"
             type="tel"
-            placeholder="+233 20 000 0000"
+            placeholder="+49 20 000 0000"
           />
 
+          {/* Country */}
           <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">
-              Country of residence <span className="text-brand-danger">*</span>
+            <label className="block text-xs font-semibold text-gray-700 mb-2">
+              Country of residence <span className="text-red-500">*</span>
             </label>
             <Select
               {...register("country")}
-              options={COUNTRIES.map((c) => ({ value: c.code, label: c.name }))}
+              options={COUNTRIES.map((c) => ({
+                value: c.code,
+                label: c.name,
+              }))}
               placeholder="Select country…"
               error={errors.country?.message}
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label className="block text-xs font-medium text-foreground/60 mb-1.5">
-              Password <span className="text-brand-danger">*</span>
+            <label className="block text-xs font-semibold text-gray-700 mb-2">
+              Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
@@ -139,21 +225,25 @@ export function RegisterForm() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Min. 8 characters"
                 autoComplete="new-password"
-                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 pr-10 text-sm text-foreground placeholder:text-foreground/40 focus:border-brand-secondary focus:outline-none dark:border-slate-700 dark:bg-slate-900"
+                className="h-11 w-full rounded-xl border-2 border-gray-200 bg-white/80 backdrop-blur-sm px-3 pr-10 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-200"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-xs text-brand-danger">{errors.password.message}</p>
+              <p className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-500"></span>
+                {errors.password.message}
+              </p>
             )}
           </div>
 
+          {/* Confirm Password */}
           <RHFInput<RegisterFormValues>
             name="confirmPassword"
             label="Confirm password"
@@ -162,63 +252,103 @@ export function RegisterForm() {
             required
           />
 
-          <div className="space-y-2.5 pt-1">
-            <label className="flex items-start gap-2.5 cursor-pointer">
+          {/* Checkboxes */}
+          <div className="space-y-3 pt-2 border-t border-gray-100">
+            <label className="flex items-start gap-3 cursor-pointer group">
               <input
                 {...register("agreedToTerms")}
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-brand-secondary"
+                className="mt-1 h-4 w-4 rounded border-2 border-gray-300 accent-blue-600 cursor-pointer transition-all duration-200"
               />
-              <span className="text-xs text-foreground/55">
+              <span className="text-xs text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors">
                 I agree to the{" "}
-                <Link href="/terms-of-service" className="text-brand-secondary hover:underline">Terms of Service</Link>{" "}
+                <Link
+                  href="/terms-of-service"
+                  className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                >
+                  Terms of Service
+                </Link>{" "}
                 and{" "}
-                <Link href="/privacy-policy" className="text-brand-secondary hover:underline">Privacy Policy</Link>.
+                <Link
+                  href="/privacy-policy"
+                  className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                >
+                  Privacy Policy
+                </Link>
+                .
               </span>
             </label>
             {errors.agreedToTerms && (
-              <p className="text-xs text-brand-danger">{errors.agreedToTerms.message}</p>
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-500"></span>
+                {errors.agreedToTerms.message}
+              </p>
             )}
 
-            <label className="flex items-start gap-2.5 cursor-pointer">
+            <label className="flex items-start gap-3 cursor-pointer group">
               <input
                 {...register("agreedToRisk")}
                 type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-brand-secondary"
+                className="mt-1 h-4 w-4 rounded border-2 border-gray-300 accent-blue-600 cursor-pointer transition-all duration-200"
               />
-              <span className="text-xs text-foreground/55">
+              <span className="text-xs text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors">
                 I have read and understood the{" "}
-                <Link href="/risk-disclosure" className="text-brand-secondary hover:underline">Risk Disclosure</Link>.
+                <Link
+                  href="/risk-disclosure"
+                  className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                >
+                  Risk Disclosure
+                </Link>
+                .
               </span>
             </label>
             {errors.agreedToRisk && (
-              <p className="text-xs text-brand-danger">{errors.agreedToRisk.message}</p>
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-500"></span>
+                {errors.agreedToRisk.message}
+              </p>
             )}
           </div>
 
+          {/* Error Message */}
           {serverError && (
-            <div className="rounded-lg border border-brand-danger/20 bg-red-50 p-3 text-xs text-brand-danger dark:bg-red-950/20">
-              {serverError}
+            <div className="rounded-xl bg-red-50 border-2 border-red-200 p-3.5 text-xs text-red-600 flex items-start gap-2.5">
+              <Shield size={16} className="shrink-0 mt-0.5 text-red-400" />
+              <span>{serverError}</span>
             </div>
           )}
 
+          {/* Submit Button */}
           <Button
             type="submit"
             variant="primary"
-            size="md"
-            className="w-full gap-2"
-            disabled={isSubmitting}
+            size="lg"
+            className="w-full gap-2.5 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 transition-all duration-300 text-base font-semibold"
+            disabled={isSubmitting || isGoogleLoading}
           >
-            {isSubmitting ? <><Spinner size={15} /> Creating account…</> : "Create account"}
+            {isSubmitting ? (
+              <>
+                <Spinner size={18} className="text-white" />
+                Creating account...
+              </>
+            ) : (
+              "Create account"
+            )}
           </Button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-foreground/50">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-brand-secondary hover:underline">
-            Log in
-          </Link>
-        </p>
+        {/* Footer */}
+        <div className="px-6 pb-6 pt-2">
+          <p className="text-center text-sm text-gray-500">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+            >
+              Log in
+            </Link>
+          </p>
+        </div>
       </Card>
     </FormProvider>
   );

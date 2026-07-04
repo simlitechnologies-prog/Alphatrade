@@ -9,7 +9,6 @@ import { Testimonials } from "@/components/marketing/testimonials";
 import {
   Academy,
   NewsSection,
-  MobileApp,
   Security,
   CTA,
   Newsletter,
@@ -27,7 +26,7 @@ export default function Home() {
       <Academy />
       <Testimonials />
       <NewsSection />
-      <MobileApp />
+
       <Security />
       <CTA />
       <Newsletter />

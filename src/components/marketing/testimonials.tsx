@@ -5,30 +5,30 @@ import type { TestimonialItem } from "@/types/market";
 const testimonials: TestimonialItem[] = [
   {
     id: "1",
-    name: "Kwame Asante",
-    role: "Independent trader",
-    location: "Accra, Ghana",
+    name: "Lukas Schneider",
+    role: "Independent Trader",
+    location: "Berlin, Germany",
     quote:
-      "The execution speed and transparent spreads are what kept me on AlphaTrade after trying three other brokers.",
+      "The platform's execution speed and competitive spreads have significantly improved my trading experience. It's become my primary broker.",
     rating: 5,
   },
   {
     id: "2",
-    name: "Amara Okafor",
-    role: "Part-time investor",
-    location: "Lagos, Nigeria",
+    name: "Sophie Müller",
+    role: "Long-term Investor",
+    location: "Munich, Germany",
     quote:
-      "I started with the Academy lessons and moved to live trading in under a month. The dashboard makes everything clear.",
+      "The educational resources made it easy to understand the markets, and opening my first investment account was straightforward.",
     rating: 5,
   },
   {
     id: "3",
-    name: "Daniel Mensah",
-    role: "Forex trader",
-    location: "Kumasi, Ghana",
+    name: "Thomas Weber",
+    role: "Forex Trader",
+    location: "Frankfurt, Germany",
     quote:
-      "Withdrawals are processed fast and support actually answers. That trust matters more than flashy features.",
-    rating: 4,
+      "Fast withdrawals, excellent customer support, and a reliable trading platform. Everything I need is in one place.",
+    rating: 5,
   },
 ];
 
@@ -38,10 +38,10 @@ export function Testimonials() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-display text-sm font-semibold uppercase tracking-wider text-brand-secondary">
-            Trusted by traders
+            Trusted by Traders Across Europe
           </p>
           <h2 className="font-display mt-2 text-3xl font-bold text-foreground sm:text-4xl">
-            What our traders say
+            What Our Clients Say
           </h2>
         </div>
 
@@ -61,9 +61,11 @@ export function Testimonials() {
                   />
                 ))}
               </div>
+
               <p className="mt-4 text-sm leading-relaxed text-foreground/80">
                 &ldquo;{t.quote}&rdquo;
               </p>
+
               <div className="mt-5">
                 <p className="text-sm font-semibold text-foreground">
                   {t.name}

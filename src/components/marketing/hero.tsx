@@ -62,7 +62,7 @@ export function Hero() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/20 text-white hover:bg-white/10 hover:text-white"
               >
                 Explore markets
               </Button>
@@ -100,12 +100,12 @@ export function Hero() {
           transition={{ duration: 0.7, delay: 0.15 }}
           className="relative"
         >
-          <div className="glass-panel relative rounded-2xl p-5 shadow-2xl bg-gray-400">
+          <div className="glass-panel relative rounded-2xl p-5 shadow-2xl ">
             <div className="flex items-center justify-between border-b border-white/10 pb-4 ">
               <div>
-                <p className="text-xs text-white/50 ">Portfolio value</p>
-                <p className="font-display tabular text-3xl font-bold text-white">
-                  $128,940.55
+                <p className="text-xs text-white/50  ">Portfolio value</p>
+                <p className="font-display tabular text-3xl font-bold text-white ">
+                  €128,940.55
                 </p>
               </div>
               <span className="inline-flex items-center rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-medium text-green-400">
@@ -142,7 +142,7 @@ export function Hero() {
                       <p
                         className={cn(
                           "tabular text-xs",
-                          isUp ? "text-green-400" : "text-red-400",
+                          isUp ? "text-green-500" : "text-red-700",
                         )}
                       >
                         {formatPercent(asset.changePercent)}

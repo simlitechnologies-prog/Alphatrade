@@ -21,19 +21,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          "h-11 w-full rounded-lg border bg-white px-3 text-sm text-foreground placeholder:text-foreground/40 transition-colors focus:outline-none dark:bg-slate-900",
+          "h-11 w-full rounded-lg border bg-white px-3 text-sm text-foreground placeholder:text-foreground/40 transition-colors focus:outline-none dark:bg-white",
           error
             ? "border-brand-danger focus:border-brand-danger"
             : "border-slate-300 focus:border-brand-secondary dark:border-slate-700",
-          className
+          className,
         )}
         {...props}
       />
-      {error && (
-        <p className="mt-1 text-xs text-brand-danger">{error}</p>
-      )}
+      {error && <p className="mt-1 text-xs text-brand-danger">{error}</p>}
     </div>
-  )
+  ),
 );
 Input.displayName = "Input";
 
@@ -51,11 +49,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={cn(
-          "h-11 w-full rounded-lg border bg-white px-3 text-sm text-foreground transition-colors focus:outline-none dark:bg-slate-900",
+          "h-11 w-full rounded-lg border bg-white px-3 text-sm text-foreground transition-colors focus:outline-none dark:bg-white",
           error
             ? "border-brand-danger focus:border-brand-danger"
             : "border-slate-300 focus:border-brand-secondary dark:border-slate-700",
-          className
+          className,
         )}
         {...props}
       >
@@ -72,7 +70,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       </select>
       {error && <p className="mt-1 text-xs text-brand-danger">{error}</p>}
     </div>
-  )
+  ),
 );
 Select.displayName = "Select";
 
@@ -88,17 +86,17 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       <textarea
         ref={ref}
         className={cn(
-          "w-full resize-none rounded-lg border bg-white px-3 py-2.5 text-sm text-foreground placeholder:text-foreground/40 transition-colors focus:outline-none dark:bg-slate-900",
+          "w-full resize-none rounded-lg border bg-white px-3 py-2.5 text-sm text-foreground placeholder:text-foreground/40 transition-colors focus:outline-none dark:bg-white",
           error
             ? "border-brand-danger focus:border-brand-danger"
             : "border-slate-300 focus:border-brand-secondary dark:border-slate-700",
-          className
+          className,
         )}
         {...props}
       />
       {error && <p className="mt-1 text-xs text-brand-danger">{error}</p>}
     </div>
-  )
+  ),
 );
 Textarea.displayName = "Textarea";
 
@@ -126,9 +124,7 @@ export function FormField({
         {required && <span className="ml-0.5 text-brand-danger">*</span>}
       </label>
       {children}
-      {hint && !error && (
-        <p className="text-xs text-foreground/40">{hint}</p>
-      )}
+      {hint && !error && <p className="text-xs text-foreground/40">{hint}</p>}
       {error && <p className="text-xs text-brand-danger">{error}</p>}
     </div>
   );
@@ -165,7 +161,13 @@ export function RHFInput<T extends FieldValues>({
   const error = errors[name]?.message as string | undefined;
 
   return (
-    <FormField label={label} required={required} error={error} hint={hint} className={className}>
+    <FormField
+      label={label}
+      required={required}
+      error={error}
+      hint={hint}
+      className={className}
+    >
       <Input
         {...register(name, rules)}
         type={type}
@@ -178,7 +180,13 @@ export function RHFInput<T extends FieldValues>({
 
 // ─── Loading spinner ──────────────────────────────────────────────────────────
 
-export function Spinner({ size = 16, className }: { size?: number; className?: string }) {
+export function Spinner({
+  size = 16,
+  className,
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       className={cn("animate-spin", className)}

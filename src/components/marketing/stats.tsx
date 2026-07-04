@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 const stats = [
   { value: "2.1M+", label: "Active traders worldwide" },
-  { value: "$48B+", label: "Monthly trading volume" },
+  { value: "€48B+", label: "Monthly trading volume" },
   { value: "180+", label: "Tradable markets" },
   { value: "99.98%", label: "Platform uptime" },
 ];
