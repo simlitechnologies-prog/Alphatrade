@@ -32,7 +32,7 @@ function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function DashboardTopbar({ title }: { title: string }) {
+export function DashboardTopbar({}: { title: string }) {
   const { user } = useAuth(); // ✅ Removed logout from destructuring
   const router = useRouter();
   const [dark, setDark] = useState(false);
@@ -88,10 +88,6 @@ export function DashboardTopbar({ title }: { title: string }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-sm px-4 md:px-6 dark:border-slate-800 dark:bg-slate-950/80 transition-colors duration-300">
       <div className="flex items-center gap-4">
-        <h1 className="font-display text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
-          {title}
-        </h1>
-
         {/* Balance indicator */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 dark:from-green-950/30 dark:to-emerald-950/30 dark:border-green-800/30">
           <Euro size={14} className="text-green-600 dark:text-green-400" />

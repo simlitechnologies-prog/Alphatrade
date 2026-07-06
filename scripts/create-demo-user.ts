@@ -11,7 +11,16 @@ import {
   createUserWithEmailAndPassword,
   fetchSignInMethodsForEmail,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 // Firebase config from environment
 const firebaseConfig = {
@@ -59,36 +68,58 @@ async function createDemoUser() {
     // Check if user already exists
     console.log("🔍 Checking if user already exists...");
     let userExists = false;
+    let existingUid = null;
+
     try {
       const signInMethods = await fetchSignInMethodsForEmail(auth, DEMO_EMAIL);
       if (signInMethods && signInMethods.length > 0) {
         userExists = true;
         console.log("✅ User already exists with methods:", signInMethods);
+
+        // Try to find the user's UID from Firestore
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", DEMO_EMAIL));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          existingUid = snapshot.docs[0].id;
+          console.log(`📋 Found existing user with UID: ${existingUid}`);
+        }
       }
     } catch (error: any) {
       console.log("ℹ️ User does not exist yet, will create new account");
     }
 
-    if (userExists) {
-      console.log("✅ Demo user already exists!");
+    let userId;
+
+    if (userExists && existingUid) {
+      userId = existingUid;
+      console.log(`✅ Using existing user with UID: ${userId}`);
+    } else if (userExists) {
+      console.error(
+        "❌ User exists in Auth but not in Firestore. Please delete the user from Firebase Auth first.",
+      );
+      console.log(
+        "💡 Go to Firebase Console > Authentication > Users > Delete this user",
+      );
+      process.exit(1);
       return;
+    } else {
+      // Create the user
+      console.log("📝 Creating demo user in Firebase Auth...");
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        DEMO_EMAIL,
+        DEMO_PASSWORD,
+      );
+      const user = userCredential.user;
+      userId = user.uid;
+      console.log(`✅ Demo user created with UID: ${userId}`);
     }
 
-    // Create the user
-    console.log("📝 Creating demo user in Firebase Auth...");
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      DEMO_EMAIL,
-      DEMO_PASSWORD,
-    );
-
-    const user = userCredential.user;
-    console.log(`✅ Demo user created with UID: ${user.uid}`);
-
-    // Create user profile in Firestore
+    // === 1. CREATE USER PROFILE ===
     console.log("📝 Creating user profile in Firestore...");
-    await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
+    await setDoc(doc(db, "users", userId), {
+      uid: userId,
       firstName: "Lukas",
       lastName: "Schneider",
       displayName: "Lukas Schneider",
@@ -103,10 +134,10 @@ async function createDemoUser() {
       lastLogin: serverTimestamp(),
     });
 
-    // Create portfolio
+    // === 2. CREATE PORTFOLIO ===
     console.log("📝 Creating portfolio...");
-    await setDoc(doc(db, "portfolios", user.uid), {
-      userId: user.uid,
+    await setDoc(doc(db, "portfolios", userId), {
+      userId: userId,
       balance: 1385420.75,
       equity: 1428735.6,
       freeMargin: 1265000.0,
@@ -121,14 +152,14 @@ async function createDemoUser() {
       updatedAt: serverTimestamp(),
     });
 
-    // Create positions
+    // === 3. CREATE POSITIONS (FIXED: Uppercase direction, proper structure) ===
     console.log("📝 Creating positions...");
     const positions = [
       {
         id: "pos-1",
-        userId: user.uid,
+        userId: userId,
         symbol: "EUR/USD",
-        direction: "long",
+        direction: "BUY", // ✅ FIXED: uppercase
         lots: 18.5,
         entryPrice: 1.0715,
         currentPrice: 1.1248,
@@ -142,9 +173,9 @@ async function createDemoUser() {
       },
       {
         id: "pos-2",
-        userId: user.uid,
+        userId: userId,
         symbol: "BTC/USD",
-        direction: "long",
+        direction: "BUY",
         lots: 6.5,
         entryPrice: 23850,
         currentPrice: 118650,
@@ -158,9 +189,9 @@ async function createDemoUser() {
       },
       {
         id: "pos-3",
-        userId: user.uid,
+        userId: userId,
         symbol: "DE40",
-        direction: "long",
+        direction: "BUY",
         lots: 25,
         entryPrice: 12180,
         currentPrice: 24360,
@@ -174,9 +205,9 @@ async function createDemoUser() {
       },
       {
         id: "pos-4",
-        userId: user.uid,
+        userId: userId,
         symbol: "XAU/USD",
-        direction: "long",
+        direction: "BUY",
         lots: 32,
         entryPrice: 1765,
         currentPrice: 3348,
@@ -191,116 +222,121 @@ async function createDemoUser() {
     ];
 
     for (const position of positions) {
-      const docId = safeDocId(`${user.uid}_${position.id}`);
+      const docId = safeDocId(`${userId}_${position.id}`);
       await setDoc(doc(db, "positions", docId), position);
     }
 
-    // Create watchlist - FIXED: Use safe document IDs
+    // === 4. CREATE WATCHLIST (FIXED: Added id field) ===
     console.log("📝 Creating watchlist...");
     const watchlist = [
       {
-        symbol: "BTCUSD",
-        displaySymbol: "BTC/USD",
+        id: "watch-1", // ✅ FIXED: Added id
+        userId: userId,
+        symbol: "BTC/USD", // ✅ FIXED: Use display format
         name: "Bitcoin",
         price: 118650,
         changePercent: 3.82,
+        createdAt: serverTimestamp(),
       },
       {
-        symbol: "ETHUSD",
-        displaySymbol: "ETH/USD",
+        id: "watch-2",
+        userId: userId,
+        symbol: "ETH/USD",
         name: "Ethereum",
         price: 6840,
         changePercent: 2.41,
+        createdAt: serverTimestamp(),
       },
       {
-        symbol: "EURUSD",
-        displaySymbol: "EUR/USD",
+        id: "watch-3",
+        userId: userId,
+        symbol: "EUR/USD",
         name: "Euro/US Dollar",
         price: 1.1248,
         changePercent: 0.63,
+        createdAt: serverTimestamp(),
       },
       {
+        id: "watch-4",
+        userId: userId,
         symbol: "DE40",
-        displaySymbol: "DE40",
         name: "Germany 40",
         price: 24360,
         changePercent: 1.45,
+        createdAt: serverTimestamp(),
       },
       {
-        symbol: "XAUUSD",
-        displaySymbol: "XAU/USD",
+        id: "watch-5",
+        userId: userId,
+        symbol: "XAU/USD",
         name: "Gold",
         price: 3348,
         changePercent: 0.91,
+        createdAt: serverTimestamp(),
       },
       {
+        id: "watch-6",
+        userId: userId,
         symbol: "US500",
-        displaySymbol: "US500",
         name: "S&P 500",
         price: 7285,
         changePercent: 0.52,
+        createdAt: serverTimestamp(),
       },
     ];
 
     for (const item of watchlist) {
-      const docId = safeDocId(`${user.uid}_${item.symbol}`);
-      await setDoc(doc(db, "watchlists", docId), {
-        userId: user.uid,
-        symbol: item.displaySymbol || item.symbol,
-        name: item.name,
-        price: item.price,
-        changePercent: item.changePercent,
-        createdAt: serverTimestamp(),
-      });
+      const docId = safeDocId(`${userId}_${item.id}`);
+      await setDoc(doc(db, "watchlists", docId), item);
     }
 
-    // Create order history
+    // === 5. CREATE ORDERS (FIXED: Added side and quantity) ===
     console.log("📝 Creating order history...");
     const orders = [
       {
         id: "ord-1",
-        userId: user.uid,
+        userId: userId,
         symbol: "EUR/USD",
         type: "market",
-        direction: "buy",
-        lots: 8,
+        side: "BUY", // ✅ FIXED: Added side
         price: 1.0715,
+        quantity: 8, // ✅ FIXED: Added quantity
         status: "filled",
         createdAt: new Date("2012-07-18T10:25:00"),
         filledAt: new Date("2012-07-18T10:25:06"),
       },
       {
         id: "ord-2",
-        userId: user.uid,
+        userId: userId,
         symbol: "DE40",
         type: "market",
-        direction: "buy",
-        lots: 15,
+        side: "BUY",
         price: 12180,
+        quantity: 15,
         status: "filled",
         createdAt: new Date("2016-05-11T09:30:00"),
         filledAt: new Date("2016-05-11T09:30:04"),
       },
       {
         id: "ord-3",
-        userId: user.uid,
+        userId: userId,
         symbol: "BTC/USD",
         type: "market",
-        direction: "buy",
-        lots: 6.5,
+        side: "BUY",
         price: 23850,
+        quantity: 6.5,
         status: "filled",
         createdAt: new Date("2020-11-09T13:10:00"),
         filledAt: new Date("2020-11-09T13:10:05"),
       },
       {
         id: "ord-4",
-        userId: user.uid,
+        userId: userId,
         symbol: "XAU/USD",
         type: "market",
-        direction: "buy",
-        lots: 32,
+        side: "BUY",
         price: 1765,
+        quantity: 32,
         status: "filled",
         createdAt: new Date("2018-02-21T14:15:00"),
         filledAt: new Date("2018-02-21T14:15:08"),
@@ -308,11 +344,11 @@ async function createDemoUser() {
     ];
 
     for (const order of orders) {
-      const docId = safeDocId(`${user.uid}_${order.id}`);
+      const docId = safeDocId(`${userId}_${order.id}`);
       await setDoc(doc(db, "orders", docId), order);
     }
 
-    // Create portfolio growth data
+    // === 6. CREATE PORTFOLIO GROWTH DATA ===
     console.log("📝 Creating portfolio growth data...");
     const growthData = [
       { month: "2010", value: 50000 },
@@ -327,11 +363,146 @@ async function createDemoUser() {
     ];
 
     for (const data of growthData) {
-      const docId = safeDocId(`${user.uid}_${data.month}`);
+      const docId = safeDocId(`${userId}_${data.month}`);
       await setDoc(doc(db, "portfolioHistory", docId), {
-        userId: user.uid,
-        ...data,
+        userId: userId,
+        month: data.month,
+        value: data.value,
         createdAt: serverTimestamp(),
+      });
+    }
+
+    // === 7. CREATE DAILY P&L DATA (NEW - was missing) ===
+    console.log("📝 Creating daily P&L data...");
+    const dailyPnL = [
+      { day: "Mon", pnl: 1250 },
+      { day: "Tue", pnl: -320 },
+      { day: "Wed", pnl: 2840 },
+      { day: "Thu", pnl: 950 },
+      { day: "Fri", pnl: 2122.55 }, // Today's P&L
+    ];
+
+    for (const data of dailyPnL) {
+      const docId = safeDocId(`${userId}_${data.day}`);
+      await setDoc(doc(db, "dailyPnL", docId), {
+        userId: userId,
+        day: data.day,
+        pnl: data.pnl,
+        createdAt: serverTimestamp(),
+      });
+    }
+
+    // === 8. CREATE ALLOCATION DATA (NEW - was missing) ===
+    console.log("📝 Creating allocation data...");
+    const allocation = [
+      { name: "Forex", value: 25, color: "#2563EB" },
+      { name: "Crypto", value: 35, color: "#F59E0B" },
+      { name: "Indices", value: 30, color: "#10B981" },
+      { name: "Commodities", value: 10, color: "#8B5CF6" },
+    ];
+
+    for (const item of allocation) {
+      const docId = safeDocId(`${userId}_${item.name}`);
+      await setDoc(doc(db, "allocations", docId), {
+        userId: userId,
+        name: item.name,
+        value: item.value,
+        color: item.color,
+        createdAt: serverTimestamp(),
+      });
+    }
+
+    // === 9. CREATE NEWS (NEW - was missing) ===
+    console.log("📝 Creating news items...");
+    const news = [
+      {
+        id: "news-1",
+        title: "Fed signals potential rate cuts in 2026 amid easing inflation",
+        category: "Economy",
+        time: "2 hours ago",
+        impact: "high",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "news-2",
+        title: "Bitcoin breaks $120,000 as institutional adoption accelerates",
+        category: "Crypto",
+        time: "4 hours ago",
+        impact: "high",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "news-3",
+        title: "European markets rally as German economic data beats forecasts",
+        category: "Markets",
+        time: "6 hours ago",
+        impact: "medium",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "news-4",
+        title: "Gold surges to new all-time high above $3,300",
+        category: "Commodities",
+        time: "8 hours ago",
+        impact: "medium",
+        createdAt: serverTimestamp(),
+      },
+    ];
+
+    for (const item of news) {
+      const docId = safeDocId(`${userId}_${item.id}`);
+      await setDoc(doc(db, "news", docId), {
+        ...item,
+        userId: userId,
+      });
+    }
+
+    // === 10. CREATE CALENDAR EVENTS (NEW - was missing) ===
+    console.log("📝 Creating calendar events...");
+    const calendar = [
+      {
+        id: "cal-1",
+        event: "ECB Interest Rate Decision",
+        country: "EUR",
+        date: "2026-07-10",
+        time: "12:45",
+        impact: "high",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "cal-2",
+        event: "US CPI Data Release",
+        country: "US",
+        date: "2026-07-11",
+        time: "14:30",
+        impact: "high",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "cal-3",
+        event: "Germany Industrial Production",
+        country: "DE",
+        date: "2026-07-08",
+        time: "08:00",
+        impact: "medium",
+        createdAt: serverTimestamp(),
+      },
+      {
+        id: "cal-4",
+        event: "UK GDP Preliminary Q2",
+        country: "UK",
+        date: "2026-07-12",
+        time: "09:30",
+        impact: "medium",
+        createdAt: serverTimestamp(),
+      },
+    ];
+
+    for (const item of calendar) {
+      const docId = safeDocId(`${userId}_${item.id}`);
+      await setDoc(doc(db, "calendarEvents", docId), {
+        ...item,
+        userId: userId,
       });
     }
 
@@ -344,8 +515,33 @@ async function createDemoUser() {
     console.log(`💰 Portfolio Value: €1,385,420.75`);
     console.log(`📈 All-Time P&L: €912,735.25 (192.64%)`);
     console.log(`📊 Open Positions: 4`);
+    console.log(`📋 Watchlist Items: 6`);
+    console.log(`📝 Pending Orders: 0 (historical orders: 4)`);
     console.log("═══════════════════════════════════════");
     console.log("🎯 You can now log in with these credentials!");
+
+    // === VERIFICATION ===
+    console.log("\n🔍 Verifying data...");
+    const verifyCollection = async (collectionName: string) => {
+      const q = query(
+        collection(db, collectionName),
+        where("userId", "==", userId),
+      );
+      const snapshot = await getDocs(q);
+      console.log(
+        `📊 ${collectionName}: ${snapshot.docs.length} documents found`,
+      );
+      return snapshot.docs.length;
+    };
+
+    await verifyCollection("positions");
+    await verifyCollection("watchlists");
+    await verifyCollection("orders");
+    await verifyCollection("portfolioHistory");
+    await verifyCollection("dailyPnL");
+    await verifyCollection("allocations");
+    await verifyCollection("news");
+    await verifyCollection("calendarEvents");
   } catch (error: any) {
     console.error("❌ Error setting up demo user:", error);
 
@@ -354,7 +550,9 @@ async function createDemoUser() {
       console.error("\n🔑 Invalid API Key. Check your .env.local file.");
       console.error("Make sure NEXT_PUBLIC_FIREBASE_API_KEY is correct.");
     } else if (error.code === "auth/email-already-in-use") {
-      console.error("\n📧 Email already in use. Try a different email.");
+      console.error("\n📧 Email already in use but not found in Firestore.");
+      console.error("Please delete the user from Firebase Auth first:");
+      console.error("Firebase Console > Authentication > Users > Delete user");
     } else if (error.code === "auth/operation-not-allowed") {
       console.error(
         "\n⚠️ Email/Password sign-in is not enabled in Firebase Console.",
@@ -366,11 +564,6 @@ async function createDemoUser() {
       console.error(
         "\n⏳ Too many requests. Wait a few minutes and try again.",
       );
-    } else if (error.code === "invalid-argument") {
-      console.error(
-        "\n📄 Invalid document reference. This might be due to special characters in the ID.",
-      );
-      console.error("The script has been fixed to handle this.");
     }
   }
 }
