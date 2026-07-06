@@ -46,6 +46,8 @@ export async function signUp(
     const { email, password, firstName, lastName, phoneNumber, country } =
       values;
 
+    console.log("🔵 Attempting sign up for:", email);
+
     // Set persistence based on remember me (default to local)
     await setPersistence(auth, browserLocalPersistence);
 
@@ -56,6 +58,8 @@ export async function signUp(
       password,
     );
     const user = userCredential.user;
+
+    console.log("✅ User created:", user.uid);
 
     // Update profile with display name
     await updateProfile(user, {
@@ -81,12 +85,14 @@ export async function signUp(
       isActive: true,
     });
 
+    console.log("✅ User data saved to Firestore");
+
     return {
       success: true,
       user,
     };
   } catch (error) {
-    console.error("Sign up error:", error);
+    console.error("❌ Sign up error:", error);
     const authError = error as AuthError;
     return {
       success: false,
@@ -99,6 +105,8 @@ export async function signUp(
 export async function signIn(values: LoginFormValues): Promise<AuthResponse> {
   try {
     const { email, password, rememberMe } = values;
+
+    console.log("🔵 Attempting sign in for:", email);
 
     // Set persistence based on remember me
     await setPersistence(
@@ -113,14 +121,9 @@ export async function signIn(values: LoginFormValues): Promise<AuthResponse> {
     );
     const user = userCredential.user;
 
-    // Check if email is verified (optional - you can remove this check)
-    // if (!user.emailVerified) {
-    //   await firebaseSignOut(auth);
-    //   return {
-    //     success: false,
-    //     error: "Please verify your email before logging in. Check your inbox for the verification link.",
-    //   };
-    // }
+    console.log("✅ Sign in successful for:", user.email);
+    console.log("✅ User UID:", user.uid);
+    console.log("✅ Email verified:", user.emailVerified);
 
     // Update last login in Firestore
     await setDoc(
@@ -129,12 +132,14 @@ export async function signIn(values: LoginFormValues): Promise<AuthResponse> {
       { merge: true },
     );
 
+    console.log("✅ Last login updated in Firestore");
+
     return {
       success: true,
       user,
     };
   } catch (error) {
-    console.error("Sign in error:", error);
+    console.error("❌ Sign in error:", error);
     const authError = error as AuthError;
     return {
       success: false,
@@ -146,12 +151,17 @@ export async function signIn(values: LoginFormValues): Promise<AuthResponse> {
 // Sign in with Google
 export async function signInWithGoogle(): Promise<AuthResponse> {
   try {
+    console.log("🔵 Attempting Google sign in");
+
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
+
+    console.log("✅ Google sign in successful for:", user.email);
 
     // Check if user exists in Firestore, if not create profile
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (!userDoc.exists()) {
+      console.log("📝 Creating new user profile in Firestore");
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -172,12 +182,14 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
       );
     }
 
+    console.log("✅ User profile saved/updated");
+
     return {
       success: true,
       user,
     };
   } catch (error) {
-    console.error("Google sign in error:", error);
+    console.error("❌ Google sign in error:", error);
     const authError = error as AuthError;
     return {
       success: false,
@@ -190,8 +202,9 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
 export async function signOut(): Promise<void> {
   try {
     await firebaseSignOut(auth);
+    console.log("✅ Sign out successful");
   } catch (error) {
-    console.error("Sign out error:", error);
+    console.error("❌ Sign out error:", error);
     throw error;
   }
 }
@@ -235,6 +248,7 @@ function getAuthErrorMessage(errorCode: string): string {
       "This operation requires recent authentication. Please sign in again.",
     "auth/account-exists-with-different-credential":
       "An account with this email already exists. Please sign in with your password instead.",
+    "auth/invalid-credential": "Invalid email or password. Please try again.",
   };
 
   return (

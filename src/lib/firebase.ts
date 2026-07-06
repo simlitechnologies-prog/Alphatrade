@@ -1,5 +1,3 @@
-// Firebase initialisation — fill environment variables in .env.local before connecting.
-
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
@@ -11,15 +9,29 @@ export const firebaseConfig = {
 };
 
 export const COLLECTIONS = {
-  USERS: "users", WALLETS: "wallets", PORTFOLIOS: "portfolios",
-  WATCHLISTS: "watchlists", ORDERS: "orders", POSITIONS: "positions",
-  TRADES: "trades", TRANSACTIONS: "transactions", MARKETS: "markets",
-  NEWS: "news", ALERTS: "alerts", NOTIFICATIONS: "notifications",
-  SUPPORT_TICKETS: "supportTickets", TICKET_MESSAGES: "ticketMessages",
-  KYC_APPLICATIONS: "kycApplications", KYC_DOCUMENTS: "kycDocuments",
-  AML_FLAGS: "amlFlags", CALENDAR_EVENTS: "calendarEvents",
-  ADMINS: "admins", ADMIN_ROLES: "adminRoles", SETTINGS: "settings",
-  SESSIONS: "sessions", AUDIT_LOGS: "auditLogs",
+  USERS: "users",
+  WALLETS: "wallets",
+  PORTFOLIOS: "portfolios",
+  WATCHLISTS: "watchlists",
+  ORDERS: "orders",
+  POSITIONS: "positions",
+  TRADES: "trades",
+  TRANSACTIONS: "transactions",
+  MARKETS: "markets",
+  NEWS: "news",
+  ALERTS: "alerts",
+  NOTIFICATIONS: "notifications",
+  SUPPORT_TICKETS: "supportTickets",
+  TICKET_MESSAGES: "ticketMessages",
+  KYC_APPLICATIONS: "kycApplications",
+  KYC_DOCUMENTS: "kycDocuments",
+  AML_FLAGS: "amlFlags",
+  CALENDAR_EVENTS: "calendarEvents",
+  ADMINS: "admins",
+  ADMIN_ROLES: "adminRoles",
+  SETTINGS: "settings",
+  SESSIONS: "sessions",
+  AUDIT_LOGS: "auditLogs",
 } as const;
 
 export const STORAGE_PATHS = {
@@ -32,15 +44,21 @@ export const STORAGE_PATHS = {
 export const CLOUD_FUNCTIONS = {
   ON_USER_CREATED: "onUserCreated",
   SEND_VERIFICATION_EMAIL: "sendVerificationEmail",
-  PLACE_ORDER: "placeOrder", CANCEL_ORDER: "cancelOrder",
-  CLOSE_POSITION: "closePosition", CALCULATE_MARGIN: "calculateMargin",
-  INITIATE_DEPOSIT: "initiateDeposit", PROCESS_WITHDRAWAL: "processWithdrawal",
+  PLACE_ORDER: "placeOrder",
+  CANCEL_ORDER: "cancelOrder",
+  CLOSE_POSITION: "closePosition",
+  CALCULATE_MARGIN: "calculateMargin",
+  INITIATE_DEPOSIT: "initiateDeposit",
+  PROCESS_WITHDRAWAL: "processWithdrawal",
   UPDATE_WALLET_BALANCE: "updateWalletBalance",
-  SUBMIT_KYC: "submitKYCApplication", APPROVE_KYC: "approveKYCApplication",
-  REJECT_KYC: "rejectKYCApplication", CREATE_AML_FLAG: "createAMLFlag",
+  SUBMIT_KYC: "submitKYCApplication",
+  APPROVE_KYC: "approveKYCApplication",
+  REJECT_KYC: "rejectKYCApplication",
+  CREATE_AML_FLAG: "createAMLFlag",
   SEND_PUSH_NOTIFICATION: "sendPushNotification",
   BROADCAST_NOTIFICATION: "broadcastNotification",
-  SUSPEND_USER: "suspendUser", ACTIVATE_USER: "activateUser",
+  SUSPEND_USER: "suspendUser",
+  ACTIVATE_USER: "activateUser",
   GENERATE_REPORT: "generateReport",
 } as const;
 

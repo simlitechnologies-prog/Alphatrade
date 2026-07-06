@@ -163,7 +163,7 @@ export function Navbar() {
             >
               <Button
                 variant="outline"
-                className="w-full border-slate-300 dark:border-slate-700 text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-[#1E293B]"
+                className="w-full border-slate-300 dark:border-slate-700 text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 dark:hover:text-white"
               >
                 Anmelden
               </Button>
