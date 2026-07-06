@@ -1,3 +1,5 @@
+// services/marketData.service.ts
+
 import { tickerAssets } from "@/data/markets";
 import type { Asset, Candle, Timeframe } from "@/types/market";
 
@@ -122,7 +124,6 @@ export async function fetchQuotes(symbols: string[]): Promise<Asset[]> {
     }
   } catch (error) {
     console.error(`Error fetching quotes from ${PROVIDER}:`, error);
-    // Fallback to mock data on error
     return tickerAssets.filter((a) => symbols.includes(a.symbol));
   }
 }
@@ -197,7 +198,7 @@ export async function searchAssets(query: string): Promise<Asset[]> {
 
 // ─── Provider Implementations ─────────────────────────────────────────────
 
-// 1. TWELVE DATA (Recommended - Free tier available)
+// 1. TWELVE DATA
 async function fetchTwelveDataQuotes(symbols: string[]): Promise<Asset[]> {
   const joined = symbols.join(",");
   const url = `https://api.twelvedata.com/quote?symbol=${joined}&apikey=${API_KEY}`;
@@ -209,7 +210,6 @@ async function fetchTwelveDataQuotes(symbols: string[]): Promise<Asset[]> {
 
   const data = await response.json();
 
-  // Handle single symbol response
   if (!Array.isArray(data)) {
     return [mapTwelveDataQuote(data)];
   }
@@ -343,7 +343,6 @@ async function fetchFinnhubCandles(
   timeframe: Timeframe,
   limit: number,
 ): Promise<Candle[]> {
-  // Finnhub uses different resolution format
   const resolutionMap: Record<Timeframe, string> = {
     "1m": "1",
     "5m": "5",
@@ -357,7 +356,7 @@ async function fetchFinnhubCandles(
 
   const resolution = resolutionMap[timeframe] || "D";
   const to = Math.floor(Date.now() / 1000);
-  const from = to - limit * 86400; // Approximate
+  const from = to - limit * 86400;
 
   const url = `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}&token=${API_KEY}`;
   const response = await fetch(url);
@@ -431,7 +430,6 @@ async function fetchAlphaVantageQuotes(symbols: string[]): Promise<Asset[]> {
   return Promise.all(promises);
 }
 
-// ✅ FIXED: Properly handle optional chaining for Alpha Vantage
 function mapAlphaVantageQuote(symbol: string, data: AlphaVantageQuote): Asset {
   const quote = data["Global Quote"];
   const asset = tickerAssets.find((a) => a.symbol === symbol);
@@ -478,7 +476,7 @@ async function fetchAlphaVantageCandles(
     "1M": "monthly",
   };
 
-  const functionMap = {
+  const functionMap: Record<string, string> = {
     "1m": "TIME_SERIES_INTRADAY",
     "5m": "TIME_SERIES_INTRADAY",
     "15m": "TIME_SERIES_INTRADAY",
@@ -505,7 +503,6 @@ async function fetchAlphaVantageCandles(
 
   const data = await response.json();
 
-  // Find the time series data in the response
   const timeSeriesKey = Object.keys(data).find((key) =>
     key.includes("Time Series"),
   );
@@ -532,8 +529,6 @@ async function fetchAlphaVantageCandles(
 }
 
 async function searchAlphaVantage(query: string): Promise<Asset[]> {
-  // Alpha Vantage doesn't have a dedicated search endpoint
-  // Fallback to local search
   const q = query.toLowerCase();
   return tickerAssets.filter(
     (a) =>
@@ -560,7 +555,6 @@ async function fetchPolygonQuotes(symbols: string[]): Promise<Asset[]> {
   return Promise.all(promises);
 }
 
-// ✅ FIXED: Properly handle optional chaining for Polygon
 function mapPolygonQuote(symbol: string, data: PolygonQuote): Asset {
   const results = data.results?.[0] || { c: 0, o: 0, h: 0, l: 0, v: 0 };
   const asset = tickerAssets.find((a) => a.symbol === symbol);
@@ -616,7 +610,6 @@ async function fetchPolygonCandles(
   const multiplier = multiplierMap[timeframe] || 1;
   const timespan = timespanMap[timeframe] || "day";
 
-  // Calculate date range
   const to = Math.floor(Date.now() / 1000);
   const from = to - limit * 86400;
 

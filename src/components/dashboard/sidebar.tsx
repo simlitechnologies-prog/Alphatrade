@@ -79,11 +79,16 @@ export function DashboardSidebar() {
     <aside
       className={cn(
         "flex h-screen flex-col border-r border-slate-200 bg-brand-primary transition-all duration-300 dark:border-slate-800",
-        collapsed ? "w-16" : "w-60"
+        collapsed ? "w-16" : "w-60",
       )}
     >
       {/* Logo */}
-      <div className={cn("flex items-center gap-2.5 px-4 py-5 border-b border-white/10", collapsed && "justify-center px-0")}>
+      <div
+        className={cn(
+          "flex items-center gap-2.5 px-4 py-5 border-b border-white/10",
+          collapsed && "justify-center px-0",
+        )}
+      >
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-secondary text-white">
             <TrendingUp size={16} strokeWidth={2.5} />
@@ -106,7 +111,9 @@ export function DashboardSidebar() {
               </p>
             )}
             {group.items.map((item) => {
-              const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              const active =
+                pathname === item.href ||
+                (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
                 <Link
                   key={item.href}
@@ -117,7 +124,7 @@ export function DashboardSidebar() {
                     collapsed && "justify-center px-0",
                     active
                       ? "bg-white/10 text-white font-medium"
-                      : "text-white/55 hover:bg-white/5 hover:text-white"
+                      : "text-white/55 hover:bg-white/5 hover:text-white",
                   )}
                 >
                   <item.icon size={18} className="shrink-0" />
@@ -134,23 +141,40 @@ export function DashboardSidebar() {
         {!collapsed && (
           <div className="flex items-center gap-2.5 rounded-lg px-2 py-2">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-secondary text-sm font-bold text-white">
-              K
+              LS
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">Kwame Mensah</p>
+              <p className="truncate text-sm font-medium text-white">
+                Lukas Schneider
+              </p>
               <p className="truncate text-xs text-white/40">Pro Account</p>
             </div>
           </div>
         )}
-        <button className={cn("flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-white/50 hover:text-white transition-colors", collapsed && "justify-center")}>
+        <button
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm text-white/50 hover:text-white transition-colors",
+            collapsed && "justify-center",
+          )}
+        >
           <LogOut size={16} />
           {!collapsed && "Log out"}
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={cn("flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-xs text-white/30 hover:text-white transition-colors", collapsed && "justify-center")}
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-xs text-white/30 hover:text-white transition-colors",
+            collapsed && "justify-center",
+          )}
         >
-          {collapsed ? <ChevronRight size={16} /> : <><ChevronLeft size={16} /><span>Collapse</span></>}
+          {collapsed ? (
+            <ChevronRight size={16} />
+          ) : (
+            <>
+              <ChevronLeft size={16} />
+              <span>Collapse</span>
+            </>
+          )}
         </button>
       </div>
     </aside>

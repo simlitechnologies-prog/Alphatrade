@@ -86,7 +86,7 @@ export function Hero() {
             <div className="h-8 w-px bg-white/15" />
             <div>
               <p className="font-display tabular text-2xl font-semibold text-white">
-                $48B+
+                €48B+
               </p>
               <p className="text-xs">Monthly volume</p>
             </div>

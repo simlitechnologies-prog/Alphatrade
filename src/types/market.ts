@@ -16,13 +16,15 @@ export interface Asset {
   name: string;
   assetClass: AssetClass;
   price: number;
-  changeAmount: number;
+  changeAmount?: number;
   changePercent: number;
   dayHigh: number;
   dayLow: number;
-  volume: number;
-  marketStatus: MarketStatus;
-  currency: string;
+  volume?: number;
+  marketStatus?: "open" | "closed" | "pre-market" | "after-hours";
+  currency?: string;
+  open?: number;
+  previousClose?: number;
 }
 
 export interface Candle {

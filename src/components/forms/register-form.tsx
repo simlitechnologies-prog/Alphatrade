@@ -3,9 +3,10 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserPlus, Check, Eye, EyeOff, Shield } from "lucide-react";
-import { FaChrome } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 import { registerSchema, type RegisterFormValues } from "@/lib/schemas";
 import { signUp, signInWithGoogle } from "@/services/auth.service";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const perks = [
 ];
 
 export function RegisterForm() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -49,8 +51,13 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterFormValues) {
     setServerError(null);
     const result = await signUp(values);
+
     if (result.success) {
       setSuccess(true);
+      // Auto-redirect after 3 seconds
+      setTimeout(() => {
+        router.push("/verify-email");
+      }, 3000);
     } else {
       setServerError(result.error ?? "Registration failed. Please try again.");
     }
@@ -60,11 +67,18 @@ export function RegisterForm() {
     setIsGoogleLoading(true);
     setServerError(null);
     try {
-      await signInWithGoogle();
-      // The user will be redirected to Google's OAuth page
-      // Success will be handled on the callback page
+      const result = await signInWithGoogle();
+      if (result.success) {
+        router.push("/dashboard");
+      } else {
+        setServerError(
+          result.error ?? "Google sign-up failed. Please try again.",
+        );
+      }
     } catch (error) {
+      console.error("Google sign-up error:", error);
       setServerError("Google sign-up failed. Please try again.");
+    } finally {
       setIsGoogleLoading(false);
     }
   }
@@ -82,11 +96,14 @@ export function RegisterForm() {
           Check your inbox for a verification email, then log in to start
           trading.
         </p>
+        <div className="mt-4 text-xs text-gray-500">
+          Redirecting to verification page...
+        </div>
         <Link href="/login">
           <Button
             variant="primary"
             size="lg"
-            className="mt-8 w-full max-w-xs mx-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-200 transition-all duration-300"
+            className="mt-4 w-full max-w-xs mx-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-200 transition-all duration-300"
           >
             Go to login
           </Button>
@@ -147,7 +164,7 @@ export function RegisterForm() {
               {isGoogleLoading ? (
                 <Spinner size={18} className="text-gray-600" />
               ) : (
-                <FaChrome size={20} className="text-blue-600" />
+                <FaGoogle size={20} className="text-blue-600" />
               )}
               {isGoogleLoading ? "Signing up..." : "Sign up with Google"}
             </Button>
